@@ -70,7 +70,7 @@ jobs:
             const { issue: { number: issue_number }, repo: { owner, repo } } = context;
             const coverageResult = "${{ steps.test_id.outputs.std_out }}";
             const separator = `=============================== Coverage summary ===============================`;
-            console.debug(separator);
+            console.debug(coverageResult);
             if (coverageResult.split(separator).length > 1) {
               console.debug(coverageResult.split(separator)[1]);
               const body = `## Coverage Summary\n${separator}\n${coverageResult.split(separator)[1]}`;
