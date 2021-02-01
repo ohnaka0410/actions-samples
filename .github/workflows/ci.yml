@@ -69,10 +69,11 @@ jobs:
           script: |
             const { issue: { number: issue_number }, repo: { owner, repo } } = context;
             const coverageResult = `${{ steps.summary.outputs.std_out }}`;
-            const separator = "=============================== Coverage summary ===============================";
-            console.debug(coverageResult);
+            const separator = "=============================== Coverage summary ===============================\n";
             if (coverageResult.split(separator).length > 1) {
               console.debug(coverageResult.split(separator)[1]);
-              const body = `## Coverage Summary\n${separator}${coverageResult.split(separator)[1]}`;
+              const wrap = "```";
+              const summary = `${coverageResult.split(separator)[1].replace("================================================================================\n", "")}`
+              const body = `## Coverage Summary\n${wrap}\n${summary}\n${wrap}`;
               github.issues.createComment({ issue_number, owner, repo, body: body });
             }
