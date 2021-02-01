@@ -1,0 +1,75 @@
+name: Continuous Integration
+on:
+  pull_request:
+    types:
+      - opened
+      - synchronize
+      - reopened
+    branches:
+      - main
+      - develop
+
+env:
+  cache-version: v1
+
+jobs:
+  cleanup-runs:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Stop Running Actions
+        uses: rokroskar/workflow-run-cleanup-action@v0.2.2
+        env:
+          GITHUB_TOKEN: "${{ secrets.GITHUB_TOKEN }}"
+
+  coverage:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v2
+        with:
+          node-version: 14.x
+
+      - name: Cache node modules
+        uses: actions/cache@v2
+        env:
+          cache-name: cache-node-modules
+        with:
+          path: |
+            ~/.npm
+            **/node_modules
+          key: ${{ env.cache-version }}-${{ runner.os }}-build-${{ env.cache-name }}-${{ hashFiles('**/package-lock.json') }}
+          restore-keys: |
+            ${{ env.cache-version }}-${{ runner.os }}-build-${{ env.cache-name }}-
+            ${{ env.cache-version }}-${{ runner.os }}-build-
+            ${{ env.cache-version }}-${{ runner.os }}-
+
+      - name: Install Dependencies
+        run: npm ci
+
+      - name: Run Test
+        id: summary
+        run: |
+          summary=$(npm run coverage:summary)
+          # エスケープ処理
+          summary="${summary//$'\n'/\\n}"
+          echo $summary
+          echo "::set-output name=std_out::$summary"
+
+      - name: Comment PR
+        uses: actions/github-script@3
+        # pull_requestの場合のみ実行する
+        if: github.event_name == "pull_request"
+        with:
+          github-token: ${{secrets.GITHUB_TOKEN}}
+          # separator以降の文字列をPRへコメントする
+          script: |
+            const { issue: { number: issue_number }, repo: { owner, repo } } = context;
+            const coverageResult = ${{ steps.test_id.outputs.std_out }};
+            const separator = `=============================== Coverage summary ===============================`;
+            if (coverageResult.split(separator).length > 1) {
+              const body = `## Coverage Summary\n${separator}\n${coverageResult.split(separator)[1]}`;
+              github.issues.createComment({ issue_number, owner, repo, body: body });
+            }
