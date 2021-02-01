@@ -67,9 +67,12 @@ jobs:
           github-token: ${{secrets.GITHUB_TOKEN}}
           # separator以降の文字列をPRへコメントする
           script: |
-            github.issues.createComment({
-              issue_number: context.issue.number,
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              body: '👋 Thanks for reporting!'
-            })
+            const { issue: { number: issue_number }, repo: { owner, repo } } = context;
+            const coverageResult = "${{ steps.test_id.outputs.std_out }}";
+            console.debug(separator);
+            const separator = `=============================== Coverage summary ===============================`;
+            if (coverageResult.split(separator).length > 1) {
+              console.debug(coverageResult.split(separator)[1]);
+              const body = `## Coverage Summary\n${separator}\n${coverageResult.split(separator)[1]}`;
+              github.issues.createComment({ issue_number, owner, repo, body: body });
+            }
