@@ -10,6 +10,7 @@ on:
       - develop
 
 env:
+  # キャッシュ破棄ができないため、キャッシュクリア用にVersionを付与しておく。
   cache-version: v1
 
 jobs:
@@ -41,6 +42,7 @@ jobs:
           path: |
             ~/.npm
             **/node_modules
+          # yarn.lockのハッシュをキーにしてあるので、依存moduleが変われば以前のキャッシュは使われない
           key: ${{ env.cache-version }}-${{ runner.os }}-build-${{ env.cache-name }}-${{ hashFiles('**/yarn.lock') }}
           restore-keys: |
             ${{ env.cache-version }}-${{ runner.os }}-build-${{ env.cache-name }}-
