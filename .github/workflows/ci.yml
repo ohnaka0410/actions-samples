@@ -74,6 +74,6 @@ jobs:
               console.debug(coverageResult.split(separator)[1]);
               const wrap = "```";
               const summary = `${coverageResult.split(separator)[1].replace("\n================================================================================", "")}`
-              const body = `## Coverage Summary\n${wrap}\n${summary}\n${wrap}`;
+              const body = `Coverage Summary\n${wrap}\n${summary}\n${wrap}`;
               github.issues.createComment({ issue_number, owner, repo, body: body });
             }
