@@ -68,7 +68,7 @@ jobs:
           # separator以降の文字列をPRへコメントする
           script: |
             const { issue: { number: issue_number }, repo: { owner, repo } } = context;
-            const coverageResult = "${{ steps.test_id.outputs.std_out }}";
+            const coverageResult = "${{ steps.summary.outputs.std_out }}";
             const separator = `=============================== Coverage summary ===============================`;
             console.debug(coverageResult);
             if (coverageResult.split(separator).length > 1) {
