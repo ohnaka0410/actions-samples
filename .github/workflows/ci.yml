@@ -56,7 +56,6 @@ jobs:
           summary=$(npm run coverage:summary)
           # エスケープ処理
           summary="${summary//$'\n'/\\n}"
-          summary="${summary//$'"'/\"}"
           echo $summary
           echo "::set-output name=std_out::$summary"
 
@@ -69,7 +68,7 @@ jobs:
           # separator以降の文字列をPRへコメントする
           script: |
             const { issue: { number: issue_number }, repo: { owner, repo } } = context;
-            const coverageResult = "${{ steps.summary.outputs.std_out }}";
+            const coverageResult = `${{ steps.summary.outputs.std_out }}`;
             const separator = "=============================== Coverage summary ===============================";
             console.debug(coverageResult);
             if (coverageResult.split(separator).length > 1) {
