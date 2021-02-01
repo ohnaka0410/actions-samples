@@ -41,19 +41,19 @@ jobs:
           path: |
             ~/.npm
             **/node_modules
-          key: ${{ env.cache-version }}-${{ runner.os }}-build-${{ env.cache-name }}-${{ hashFiles('**/package-lock.json') }}
+          key: ${{ env.cache-version }}-${{ runner.os }}-build-${{ env.cache-name }}-${{ hashFiles('**/yarn.lock') }}
           restore-keys: |
             ${{ env.cache-version }}-${{ runner.os }}-build-${{ env.cache-name }}-
             ${{ env.cache-version }}-${{ runner.os }}-build-
             ${{ env.cache-version }}-${{ runner.os }}-
 
       - name: Install Dependencies
-        run: npm install
+        run: yarn install
 
       - name: Run Test
         id: summary
         run: |
-          summary=$(npm run coverage:summary)
+          summary=$(yarn coverage:summary)
           # エスケープ処理
           summary="${summary//$'\n'/\\n}"
           echo $summary
@@ -77,3 +77,8 @@ jobs:
               const body = `Coverage Summary\n${wrap}\n${summary}\n${wrap}`;
               github.issues.createComment({ issue_number, owner, repo, body: body });
             }
+
+      - name: Run Build
+        run: yarn build
+        env:
+          CI: false
